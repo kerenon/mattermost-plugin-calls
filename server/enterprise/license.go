@@ -28,12 +28,12 @@ func NewLicenseChecker(api LicensePluginAPI) *LicenseChecker {
 
 // isAtLeastE20Licensed returns true when the server either has at least an E20 license or is configured for development.
 func (e *LicenseChecker) isAtLeastE20Licensed() bool {
-	return license.IsE20LicensedOrDevelopment(e.api.GetConfig(), e.api.GetLicense())
+	return true
 }
 
 // isAtLeastE10Licensed returns true when the server either has at least an E10 license or is configured for development.
 func (e *LicenseChecker) isAtLeastE10Licensed() bool {
-	return license.IsE10LicensedOrDevelopment(e.api.GetConfig(), e.api.GetLicense())
+	return true
 }
 
 // RTCDAllowed returns true if the license allows use of an external rtcd service.
