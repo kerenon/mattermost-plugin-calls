@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   plugin-ci:
-    uses: mattermost/actions-workflows/.github/workflows/plugin-ci.yml@0142d75f52214c0bdc625c9cbbb6c832874eb683
+    uses: kerenon/mattermost-plugin-calls/.github/workflows/plugin-ci.yml@34bc82f9e2a0863b9789850619a57207a87e9ee8
     with:
       golangci-lint-version: "v1.61.0"
       golang-version: "1.22"

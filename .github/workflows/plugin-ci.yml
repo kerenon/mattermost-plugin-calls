@@ -1,0 +1,81 @@
+on:
+  workflow_call:
+    inputs:
+      artifacts:
+        default: "*.tar.gz"
+        description: |
+          The path or files of artifacts to upload
+        required: false
+        type: string
+
+      bucket:
+        default: mattermost-plugins-delivery/ci/
+        description: |
+          The S3 bucket full path to upload
+        required: false
+        type: string
+
+      golangci-lint-version:
+        default: "v1.55.2"
+        description: |
+          Set the version for golangci-lint
+        required: false
+        type: string
+
+      golang-version:
+        default: "1.21"
+        description: |
+          Set the version for golang
+        required: false
+        type: string
+
+      region:
+        default: us-east-1
+        description: |
+          The AWS region for S3 bucket
+        required: false
+        type: string
+
+      run-scheduled:
+        type: boolean
+        default: false
+        required: false
+        description: |
+          Permit forked repos to run the workflow in a scheduled context
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: ${{ github.repository_owner == 'kerenon' || github.event_name != 'schedule' || inputs.run-scheduled }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: ci/setup
+        uses: mattermost/actions/plugin-ci/setup@cd879ea9c64cc3e26a75a042d1c5066be28130a6
+        with:
+          golang-version: ${{ inputs.golang-version }}
+
+      - name: ci/build
+        uses: mattermost/actions/plugin-ci/build@cd879ea9c64cc3e26a75a042d1c5066be28130a6
+
+  delivery:
+    if: ${{ github.repository_owner == 'kerenon' && github.event_name != 'schedule' && (github.ref_name  == 'master' || github.ref_name  == 'main') }}
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
